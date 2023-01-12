@@ -33,7 +33,7 @@ public class SubscriptionController {
 
     @Autowired
     private ApplicationInfoManager infoManager;
-    Logger logger = LoggerFactory.getLogger(SubscriptionService.class);
+    Logger logger = LoggerFactory.getLogger(SubscriptionController.class);
 
     @LoadBalanced
     @Bean
@@ -86,12 +86,12 @@ public class SubscriptionController {
 
 
 
-    @GetMapping("/subscribedMethods/{webShopURI}")
-    public ResponseEntity<?> getSubscribedPaymentMethodsForWebShop(@PathVariable String webShopURI) {
+    @GetMapping("/subscribedMethods/{apiKey}")
+    public ResponseEntity<?> getSubscribedPaymentMethodsForWebShop(@PathVariable String apiKey) {
 
         try {
-            Set<PaymentMethod> subscribedMethods = subscriptionService.getSubscribedPaymentMethodsForWebShop(webShopURI);
-            logger.info("Overview of subscribed payment methods for web shop with id: " + webShopURI );
+            Set<PaymentMethod> subscribedMethods = subscriptionService.getSubscribedPaymentMethodsForWebShop(apiKey);
+            logger.info("Overview of subscribed payment methods for web shop with id: " + apiKey );
             return new ResponseEntity<>(subscribedMethods, HttpStatus.OK);
 
         } catch (Exception e) {

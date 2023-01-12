@@ -61,14 +61,15 @@ public class SubscriptionService {
         return subscriptionRepository.save(subscription);
     }*/
 
-    public Set<PaymentMethod> getSubscribedPaymentMethodsForWebShop(String webShopURI){
+    public Set<PaymentMethod> getSubscribedPaymentMethodsForWebShop(String apiKey){
 
-        Subscription subscription = subscriptionRepository.findByWebShopURI(webShopURI);
+        Subscription subscription = subscriptionRepository.findByApiKey(apiKey);
         Set<PaymentMethod> enabledMethods = new HashSet<>();
 
-        for(PaymentMethod method : paymentMethodRepository.findAll())
+        for(PaymentMethod method : paymentMethodRepository.findAll()){
             if(method.getSubscription().getId().equals(subscription.getId()))
                 enabledMethods.add(method);
+        }
 
         return enabledMethods;
     }

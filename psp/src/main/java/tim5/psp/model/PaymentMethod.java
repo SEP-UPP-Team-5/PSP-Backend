@@ -1,5 +1,6 @@
 package tim5.psp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class PaymentMethod {
     private Long id;
     private String methodName;
     private String merchant;
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "subscription_id")
     private Subscription subscription;

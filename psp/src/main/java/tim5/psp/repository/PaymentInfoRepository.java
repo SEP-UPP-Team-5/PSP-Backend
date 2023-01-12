@@ -6,4 +6,5 @@ import tim5.psp.model.PaymentInfo;
 
 @Repository
 public interface PaymentInfoRepository extends JpaRepository<PaymentInfo, Long> {
+
 }

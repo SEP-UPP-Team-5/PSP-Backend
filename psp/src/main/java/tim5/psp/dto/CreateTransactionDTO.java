@@ -14,4 +14,5 @@ public class CreateTransactionDTO {
     private String creatingOrderTime;
     private Double amount;
     private String webShopOrderId;
+    private String apiKey;
 }

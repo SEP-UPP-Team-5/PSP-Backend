@@ -25,6 +25,8 @@ public class PaymentInfo {
     private String payerId; //sa servisa za placanje
     private String merchantId; //sa servisa za placanje
     private String webShopOrderId; //sa web shopa
+    private String apiKey; //sa web shopa
+    private Boolean isPaid;
 
 
 }

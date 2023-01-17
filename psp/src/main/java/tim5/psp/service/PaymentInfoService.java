@@ -17,7 +17,22 @@ public class PaymentInfoService {
         paymentInfo.setAmount(createTransactionDTO.getAmount());
         paymentInfo.setDate(createTransactionDTO.getCreatingOrderTime());
         paymentInfo.setWebShopOrderId(createTransactionDTO.getWebShopOrderId());
+        paymentInfo.setApiKey(createTransactionDTO.getApiKey());
+        paymentInfo.setIsPaid(false);
 
         return paymentInfoRepository.save(paymentInfo);
+    }
+
+    public PaymentInfo findOne(Long id){
+        return paymentInfoRepository.findById(id).get();
+    }
+
+    public Boolean markAsPayed(Long transactionId) {
+        PaymentInfo transaction = paymentInfoRepository.findById(transactionId).get();
+        //ProductPurchase purchase = repository.findProductPurchaseByPayPalOrderId(id);
+        transaction.setIsPaid(true);
+        paymentInfoRepository.save(transaction);
+
+        return null;
     }
 }

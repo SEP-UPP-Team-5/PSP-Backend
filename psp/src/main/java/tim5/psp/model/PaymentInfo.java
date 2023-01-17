@@ -23,7 +23,7 @@ public class PaymentInfo {
     private Double amount;//sa web shopa
     private String paymentMethod;
     private String payerId; //sa servisa za placanje
-    private String merchantId; //sa servisa za placanje
+    private String merchantId; //ovo se zna sa psp u okviru payment methoda
     private String webShopOrderId; //sa web shopa
     private String apiKey; //sa web shopa
     private Boolean isPaid;

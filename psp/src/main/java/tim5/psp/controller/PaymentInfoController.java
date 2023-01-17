@@ -47,6 +47,7 @@ public class PaymentInfoController {
         try {
             obj.put("totalAmount", transaction.getAmount());
             obj.put("transactionId", transaction.getId());
+            obj.put("orderId", transaction.getWebShopOrderId());
             obj.put("merchantId", "BAGSGQXCCH7WU"); //TODO: set merchant id from payment method
         } catch (JSONException e) {
             e.printStackTrace();
@@ -60,9 +61,9 @@ public class PaymentInfoController {
     }
 
         @PostMapping("/confirm")
-        public String paymentConfirmation (@RequestBody Long transactionId){
-        System.out.println(transactionId);
-        paymentInfoService.markAsPayed(transactionId);
+        public String paymentConfirmation (@RequestBody String webShopOrderId){
+        System.out.println(webShopOrderId);
+
 
         return "paid";
 

@@ -9,6 +9,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import tim5.psp.dto.CreateTransactionDTO;
+import tim5.psp.dto.PaymentConfirmationDTO;
 import tim5.psp.model.PaymentInfo;
 import tim5.psp.service.PaymentInfoService;
 
@@ -61,14 +62,12 @@ public class PaymentInfoController {
         return new ResponseEntity<>(approvalUrl, HttpStatus.CREATED);
     }
 
-        @PostMapping("/confirm/{webShopOrderId}")
-        public ResponseEntity<?> paymentConfirmation(@PathVariable String webShopOrderId){
-        System.out.println(webShopOrderId);
-        paymentInfoService.markAsPayed(webShopOrderId);
-        return new ResponseEntity<>(webShopOrderId, HttpStatus.OK);
 
-   }
-
+    @PostMapping(path = "/confirm")
+    public ResponseEntity<?> confirmPayment(@RequestBody PaymentConfirmationDTO dto){
+        paymentInfoService.markAsPayed(dto);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
 
 
 }

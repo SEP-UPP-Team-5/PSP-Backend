@@ -2,6 +2,7 @@ package tim5.psp.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tim5.psp.dto.CreateTransactionDTO;
+import tim5.psp.dto.PaymentConfirmationDTO;
 import tim5.psp.model.PaymentInfo;
 import tim5.psp.repository.PaymentInfoRepository;
 
@@ -27,9 +28,10 @@ public class PaymentInfoService {
         return paymentInfoRepository.findById(id).get();
     }
 
-    public Boolean markAsPayed(String webShopOrderId) {
-        PaymentInfo transaction = paymentInfoRepository.findByWebShopOrderId(webShopOrderId);
+    public Boolean markAsPayed(PaymentConfirmationDTO dto) {
+        PaymentInfo transaction = paymentInfoRepository.findByWebShopOrderId(dto.getWebShopOrderId());
         transaction.setIsPaid(true);
+        transaction.setPayerId(dto.getPayerId());
         paymentInfoRepository.save(transaction);
 
         return null;

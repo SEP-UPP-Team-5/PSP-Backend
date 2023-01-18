@@ -27,9 +27,8 @@ public class PaymentInfoService {
         return paymentInfoRepository.findById(id).get();
     }
 
-    public Boolean markAsPayed(Long transactionId) {
-        PaymentInfo transaction = paymentInfoRepository.findById(transactionId).get();
-        //ProductPurchase purchase = repository.findProductPurchaseByPayPalOrderId(id);
+    public Boolean markAsPayed(String webShopOrderId) {
+        PaymentInfo transaction = paymentInfoRepository.findByWebShopOrderId(webShopOrderId);
         transaction.setIsPaid(true);
         paymentInfoRepository.save(transaction);
 

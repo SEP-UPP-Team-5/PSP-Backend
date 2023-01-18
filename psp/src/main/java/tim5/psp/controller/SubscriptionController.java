@@ -71,21 +71,6 @@ public class SubscriptionController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-   /* @PostMapping( path = "/delete/{webShopURI}")
-    public ResponseEntity<?> unsubscribeWebShop(@PathVariable String webShopURI, @RequestBody SubscriptionChangeDTO dto) {
-        try {
-            Subscription subscription = subscriptionService.unsubscribeWebShop(webShopURI, dto);
-            logger.info("Subscription with id: " + subscription.getId() + " successfully changed for the web shop: " + subscription.getWebShopURI());
-            return new ResponseEntity<>(SubscriptionMapper.modelToDTO(subscription), HttpStatus.OK);
-
-        } catch (Exception e) {
-            logger.error("Exception with adding payment method. Error is: " + e);
-        }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }*/
-
-
-
     @GetMapping("/subscribedMethods/{apiKey}")
     public ResponseEntity<?> getSubscribedPaymentMethodsForWebShop(@PathVariable String apiKey) {
 
@@ -100,11 +85,16 @@ public class SubscriptionController {
         }
     }
 
-
-    @PostMapping("/addMethod/{subscriptionId}")
-    public ResponseEntity<?> addMethodToWebShop(@RequestBody PaymentMethodDTO paymentMethodDTO, @PathVariable Long subscriptionId){
-       subscriptionService.addPaymentMethodToWebShop(paymentMethodDTO, subscriptionId);
+    @PostMapping("/addMethod/{subscriptionId}/{paymentMethodId}")
+    public ResponseEntity<?> addMethodToWebShop(@PathVariable Long subscriptionId, @PathVariable Long paymentMethodId){
+        subscriptionService.addPaymentMethodToWebShop(paymentMethodId, subscriptionId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
+/*
+    @PostMapping("/removeMethod/{subscriptionId}/{paymentMethodId}")
+    public ResponseEntity<?> removeMethodFromWebShop(@PathVariable Long subscriptionId, @PathVariable Long paymentMethodId){
+        subscriptionService.removePaymentMethodFromWebShop(paymentMethodId, subscriptionId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+*/
 }

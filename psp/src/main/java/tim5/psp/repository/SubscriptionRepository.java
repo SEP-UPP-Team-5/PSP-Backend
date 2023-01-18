@@ -6,7 +6,6 @@ import tim5.psp.model.Subscription;
 
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
-    Subscription findByWebShopURI(String webShopURI);
     Subscription findByApiKey(String apiKey);
 
 }

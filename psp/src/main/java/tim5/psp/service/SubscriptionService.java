@@ -11,10 +11,7 @@ import tim5.psp.model.TokenUtils;
 import tim5.psp.repository.PaymentMethodRepository;
 import tim5.psp.repository.SubscriptionRepository;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class SubscriptionService {
@@ -36,30 +33,38 @@ public class SubscriptionService {
         return subscriptionRepository.save(subscription);
     }
 
-    public PaymentMethod addPaymentMethodToWebShop(PaymentMethodDTO dto, Long subscriptionId){
+    public PaymentMethod addPaymentMethodToWebShop(Long paymentMethodId, Long subscriptionId){
         Subscription subscription = subscriptionRepository.findById(subscriptionId).get();
-
-        PaymentMethod method = new PaymentMethod();
-        method.setMethodName(dto.getMethodName());
-        method.setMerchant(dto.getMerchant());
+        PaymentMethod method = paymentMethodRepository.findById(paymentMethodId).get();
         method.setSubscription(subscription);
 
         Set<PaymentMethod> methods = subscription.getMethods();
         methods.add(method);
         subscription.setMethods(methods);
+        subscriptionRepository.save(subscription);
+
         return paymentMethodRepository.save(method);
     }
 
-    /*public Subscription unsubscribeWebShop(String webShopURI, SubscriptionChangeDTO dto){
+   /* public PaymentMethod removePaymentMethodFromWebShop(Long paymentMethodId, Long subscriptionId){
+        Subscription subscription = subscriptionRepository.findById(subscriptionId).get();
+        PaymentMethod method = paymentMethodRepository.findById(paymentMethodId).get();
+        method.getSubscription().getMethods().remove(method); //odavde uklonio
+        subscription.getMethods().remove(method);
 
-        Subscription subscription = subscriptionRepository.findByWebShopURI(webShopURI);
-        subscription.setPayPal(dto.getPayPal());
-        subscription.setBitcoin(dto.getBitcoin());
-        subscription.setCreditCard(dto.getCreditCard());
-        subscription.setQrCode(dto.getQrCode());
+        Set<PaymentMethod> methods = subscription.getMethods();
+        for (Iterator<PaymentMethod> iterator = methods.iterator(); iterator.hasNext();) {
+            PaymentMethod m =  iterator.next();
+            if (m.getId().equals(method.getId())) {
+                iterator.remove();
+                subscription.getMethods().remove(method);
+                subscriptionRepository.save(subscription);
+            }
+        }
+        return paymentMethodRepository.save(method);
+    }
 
-        return subscriptionRepository.save(subscription);
-    }*/
+*/
 
     public Set<PaymentMethod> getSubscribedPaymentMethodsForWebShop(String apiKey){
 

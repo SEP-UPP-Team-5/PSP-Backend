@@ -34,11 +34,11 @@ public class PaymentInfoController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PostMapping(path = "/send/{transactionId}") //todo: dodaj rezim za placanje
+    @PostMapping(path = "/send/{transactionId}") // TODO: add payment method
     public ResponseEntity<?> sendTransactionInfo(@PathVariable Long transactionId){
         PaymentInfo transaction = paymentInfoService.findOne(transactionId);
 
-        String payPalUrl = "http://localhost:8082/orders/create";
+        String payPalUrl = "http://localhost:8082/orders/create"; // TODO: from payment method
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -48,24 +48,24 @@ public class PaymentInfoController {
             obj.put("totalAmount", transaction.getAmount());
             obj.put("transactionId", transaction.getId());
             obj.put("orderId", transaction.getWebShopOrderId());
-            obj.put("merchantId", "BAGSGQXCCH7WU"); //TODO: set merchant id from payment method
+            obj.put("merchantId", "BAGSGQXCCH7WU"); // TODO: set merchant id from payment method
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         HttpEntity<String> request = new HttpEntity<>(obj.toString(), headers);
 
-        restTemplate().postForObject(payPalUrl, request, String.class);
+        String approvalUrl = restTemplate().postForObject(payPalUrl, request, String.class);
         System.out.println("poslato sa psp na paypal");
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        System.out.println(approvalUrl);
+        return new ResponseEntity<>(approvalUrl, HttpStatus.CREATED);
     }
 
-        @PostMapping("/confirm")
-        public String paymentConfirmation (@RequestBody String webShopOrderId){
+        @PostMapping("/confirm/{webShopOrderId}")
+        public ResponseEntity<?> paymentConfirmation(@PathVariable String webShopOrderId){
         System.out.println(webShopOrderId);
-
-
-        return "paid";
+        paymentInfoService.markAsPayed(webShopOrderId);
+        return new ResponseEntity<>(webShopOrderId, HttpStatus.OK);
 
    }
 

@@ -1,5 +1,6 @@
 package tim5.psp.service;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tim5.psp.dto.PaymentMethodDTO;
@@ -15,7 +16,7 @@ public class PaymentMethodService {
     public PaymentMethod createNewPaymentMethod(PaymentMethodDTO dto){
         PaymentMethod newMethod =  new PaymentMethod();
         newMethod.setMethodName(dto.getMethodName());
-        newMethod.setMerchant(dto.getMerchant());
+        newMethod.setMerchant(dto.getMerchant());  //for PayPal some of existing ids from developer account
 
         return paymentMethodRepository.save(newMethod);
 

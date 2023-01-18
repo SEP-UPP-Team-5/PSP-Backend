@@ -3,7 +3,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tim5.psp.dto.CreateTransactionDTO;
 import tim5.psp.dto.PaymentConfirmationDTO;
+import tim5.psp.dto.PaymentMethodDTO;
 import tim5.psp.model.PaymentInfo;
+import tim5.psp.model.PaymentMethod;
 import tim5.psp.repository.PaymentInfoRepository;
 
 @Service
@@ -24,6 +26,13 @@ public class PaymentInfoService {
         return paymentInfoRepository.save(paymentInfo);
     }
 
+    public PaymentInfo sendTransactionInfo(Long transactionId, PaymentMethodDTO paymentMethodDTO){
+        PaymentInfo transaction = paymentInfoRepository.findById(transactionId).get();
+        transaction.setPaymentMethod(paymentMethodDTO.getMethodName());
+        transaction.setMerchantId(paymentMethodDTO.getMerchant());
+        return paymentInfoRepository.save(transaction);
+    }
+
     public PaymentInfo findOne(Long id){
         return paymentInfoRepository.findById(id).get();
     }
@@ -35,5 +44,9 @@ public class PaymentInfoService {
         paymentInfoRepository.save(transaction);
 
         return null;
+    }
+
+    public void save(PaymentInfo paymentInfo){
+        paymentInfoRepository.save(paymentInfo);
     }
 }

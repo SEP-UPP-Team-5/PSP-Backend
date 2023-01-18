@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import tim5.psp.dto.CreateTransactionDTO;
 import tim5.psp.dto.PaymentConfirmationDTO;
+import tim5.psp.dto.PaymentMethodDTO;
 import tim5.psp.model.PaymentInfo;
 import tim5.psp.service.PaymentInfoService;
 
@@ -36,9 +37,12 @@ public class PaymentInfoController {
     }
 
     @PostMapping(path = "/send/{transactionId}") // TODO: add payment method
-    public ResponseEntity<?> sendTransactionInfo(@PathVariable Long transactionId){
-        PaymentInfo transaction = paymentInfoService.findOne(transactionId);
-
+    public ResponseEntity<?> sendTransactionInfo(@PathVariable Long transactionId, @RequestBody PaymentMethodDTO paymentMethodDTO){
+       /* PaymentInfo transaction = paymentInfoService.findOne(transactionId);
+        transaction.setPaymentMethod(paymentMethodDTO.getMethodName());
+        transaction.setMerchantId(paymentMethodDTO.getMerchant());
+        paymentInfoService.save(transaction);*/
+        PaymentInfo transaction = paymentInfoService.sendTransactionInfo(transactionId, paymentMethodDTO);
         String payPalUrl = "http://localhost:8082/orders/create"; // TODO: from payment method
 
         HttpHeaders headers = new HttpHeaders();
@@ -49,7 +53,7 @@ public class PaymentInfoController {
             obj.put("totalAmount", transaction.getAmount());
             obj.put("transactionId", transaction.getId());
             obj.put("orderId", transaction.getWebShopOrderId());
-            obj.put("merchantId", "BAGSGQXCCH7WU"); // TODO: set merchant id from payment method
+            obj.put("merchantId", "BAGSGQXCCH7WU");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -66,6 +70,25 @@ public class PaymentInfoController {
     @PostMapping(path = "/confirm")
     public ResponseEntity<?> confirmPayment(@RequestBody PaymentConfirmationDTO dto){
         paymentInfoService.markAsPayed(dto);
+
+        String pspUrl = "http://localhost:8081/purchase/confirm/" + dto.getWebShopOrderId();
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("webShopOrderId", dto.getWebShopOrderId());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HttpEntity<String> request = new HttpEntity<>(obj.toString(), headers);
+        String captureOrderResponse = restTemplate.postForObject(pspUrl, request, String.class);
+        System.out.println("captureOrderResponse");
+        System.out.println(captureOrderResponse);
+
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

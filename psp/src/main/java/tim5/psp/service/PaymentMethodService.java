@@ -7,6 +7,8 @@ import tim5.psp.dto.PaymentMethodDTO;
 import tim5.psp.model.PaymentMethod;
 import tim5.psp.repository.PaymentMethodRepository;
 
+import java.util.List;
+
 @Service
 public class PaymentMethodService {
 
@@ -19,6 +21,7 @@ public class PaymentMethodService {
         newMethod.setMerchant(dto.getMerchant());  //for PayPal some of existing ids from developer account
 
         return paymentMethodRepository.save(newMethod);
-
     }
+
+    public List<PaymentMethod> findAll(){return paymentMethodRepository.findAll();}
 }

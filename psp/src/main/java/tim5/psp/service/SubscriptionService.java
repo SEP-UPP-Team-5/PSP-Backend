@@ -83,5 +83,6 @@ public class SubscriptionService {
         return subscriptionRepository.save(subscription);
     }
 
+    public List<Subscription> findAll(){return subscriptionRepository.findAll();}
 }
 

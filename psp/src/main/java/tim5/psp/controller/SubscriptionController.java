@@ -97,4 +97,9 @@ public class SubscriptionController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 */
+
+    @GetMapping("/getAll")
+    public ResponseEntity<?> getAllSubscriptions(){
+        return new ResponseEntity<>(subscriptionService.findAll(), HttpStatus.OK);
+    }
 }

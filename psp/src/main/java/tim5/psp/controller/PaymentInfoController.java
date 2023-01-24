@@ -3,7 +3,9 @@ package tim5.psp.controller;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import tim5.psp.dto.PaymentMethodDTO;
 import tim5.psp.model.PaymentInfo;
 import tim5.psp.service.PaymentInfoService;
 
+import java.net.URI;
 import java.util.Date;
 
 @RestController
@@ -29,6 +32,9 @@ public class PaymentInfoController {
         return new RestTemplate();
     }
 
+    @Autowired
+    private LoadBalancerClient loadBalancerClient;
+
     @PostMapping(path = "/create")
     public ResponseEntity<?> createTransaction(@RequestBody CreateTransactionDTO createTransactionDTO){
         paymentInfoService.createTransactionFromOrderDetails(createTransactionDTO);
@@ -38,12 +44,13 @@ public class PaymentInfoController {
 
     @PostMapping(path = "/send/{transactionId}") // TODO: add payment method
     public ResponseEntity<?> sendTransactionInfo(@PathVariable Long transactionId, @RequestBody PaymentMethodDTO paymentMethodDTO){
-       /* PaymentInfo transaction = paymentInfoService.findOne(transactionId);
-        transaction.setPaymentMethod(paymentMethodDTO.getMethodName());
-        transaction.setMerchantId(paymentMethodDTO.getMerchant());
-        paymentInfoService.save(transaction);*/
+
         PaymentInfo transaction = paymentInfoService.sendTransactionInfo(transactionId, paymentMethodDTO);
+        //ServiceInstance serviceInstance = loadBalancerClient.choose("paypal");
+        //URI url = serviceInstance.getUri();
+       // System.out.println(url);
         String payPalUrl = "http://localhost:8082/orders/create"; // TODO: from payment method
+        String bitcoinUrl = "http://localhost:8085/orders/create"; // TODO: from payment method
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -53,7 +60,7 @@ public class PaymentInfoController {
             obj.put("totalAmount", transaction.getAmount());
             obj.put("transactionId", transaction.getId());
             obj.put("orderId", transaction.getWebShopOrderId());
-            obj.put("merchantId", "BAGSGQXCCH7WU");
+            obj.put("merchantId", "BAGSGQXCCH7WU");  //za paypal, za bitcoin se ne salje
         } catch (JSONException e) {
             e.printStackTrace();
         }

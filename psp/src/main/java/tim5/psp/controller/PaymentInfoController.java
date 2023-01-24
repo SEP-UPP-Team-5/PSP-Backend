@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.Date;
 
 @RestController
+@CrossOrigin
 @RequestMapping(value = "/paymentInfo")
 public class PaymentInfoController {
 

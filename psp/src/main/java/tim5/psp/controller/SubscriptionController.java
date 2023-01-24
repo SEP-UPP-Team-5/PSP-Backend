@@ -23,6 +23,7 @@ import tim5.psp.service.SubscriptionService;
 import java.util.Set;
 
 @RestController
+@CrossOrigin
 @RequestMapping(value = "/subscriptions")
 public class SubscriptionController {
     @Autowired

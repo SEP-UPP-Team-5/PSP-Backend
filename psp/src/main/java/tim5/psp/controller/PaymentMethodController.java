@@ -10,6 +10,7 @@ import tim5.psp.model.PaymentMethod;
 import tim5.psp.service.PaymentMethodService;
 
 @RestController
+@CrossOrigin
 @RequestMapping(value = "/paymentMethod")
 public class PaymentMethodController {
 

@@ -68,7 +68,7 @@ public class PaymentInfoController {
 
         HttpEntity<String> request = new HttpEntity<>(obj.toString(), headers);
 
-        String approvalUrl = restTemplate().postForObject(payPalUrl, request, String.class);
+        String approvalUrl = restTemplate().postForObject(bitcoinUrl, request, String.class);
         System.out.println("poslato sa psp na paypal");
         System.out.println(approvalUrl);
         return new ResponseEntity<>(approvalUrl, HttpStatus.CREATED);

@@ -52,6 +52,7 @@ public class PaymentInfoService {
         PaymentInfo transaction = paymentInfoRepository.findByWebShopOrderId(dto.getWebShopOrderId());
         transaction.setIsPaid(true);
         transaction.setPayerId(dto.getPayerId());
+        transaction.setMerchantId(dto.getBitcoinWalletAddress());
         paymentInfoRepository.save(transaction);
 
         return null;

@@ -27,7 +27,7 @@ public class PaymentInfo {
     private String webShopOrderId; //sa web shopa
     private Boolean isPaid;
 
-    @OneToOne
+    @ManyToOne
     private Subscription subscription;
 
 

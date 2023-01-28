@@ -14,4 +14,5 @@ public class PaymentConfirmationDTO {
 
     private String webShopOrderId;
     private String payerId;
+    private String bitcoinWalletAddress;
 }

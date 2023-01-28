@@ -46,11 +46,10 @@ public class SubscriptionService {
         return paymentMethodRepository.save(method);
     }
 
-   /* public PaymentMethod removePaymentMethodFromWebShop(Long paymentMethodId, Long subscriptionId){
+    public PaymentMethod removePaymentMethodFromWebShop(Long paymentMethodId, Long subscriptionId){
         Subscription subscription = subscriptionRepository.findById(subscriptionId).get();
         PaymentMethod method = paymentMethodRepository.findById(paymentMethodId).get();
         method.getSubscription().getMethods().remove(method); //odavde uklonio
-        subscription.getMethods().remove(method);
 
         Set<PaymentMethod> methods = subscription.getMethods();
         for (Iterator<PaymentMethod> iterator = methods.iterator(); iterator.hasNext();) {
@@ -63,8 +62,6 @@ public class SubscriptionService {
         }
         return paymentMethodRepository.save(method);
     }
-
-*/
 
     public Set<PaymentMethod> getSubscribedPaymentMethodsForWebShop(String apiKey){
 

@@ -18,6 +18,7 @@ import tim5.psp.model.PaymentInfo;
 import tim5.psp.model.PaymentMethod;
 import tim5.psp.service.PaymentInfoService;
 import tim5.psp.service.PaymentMethodService;
+import java.util.Set;
 
 @RestController
 @CrossOrigin
@@ -44,7 +45,15 @@ public class PaymentInfoController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PostMapping(path = "/send/{transactionId}/{methodId}") // TODO: add payment method
+    @GetMapping(path = "/paymentMethods/{transactionId}")
+    public ResponseEntity<?> getPaymentMethodsForWebShop(@PathVariable Long transactionId){
+        PaymentInfo transaction = paymentInfoService.findOne(transactionId);
+        Set<PaymentMethod> methods = transaction.getSubscription().getMethods();
+        return new ResponseEntity<>(methods, HttpStatus.OK);
+    }
+
+
+    @PostMapping(path = "/send/{transactionId}/{methodId}") // oov se poziva kad se klikne na izabrani nacin placanja
     public ResponseEntity<?> sendTransactionInfo(@PathVariable Long transactionId, @PathVariable Long methodId){
 
         PaymentInfo transaction = paymentInfoService.sendTransactionInfo(transactionId, methodId);

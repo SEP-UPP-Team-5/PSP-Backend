@@ -91,13 +91,13 @@ public class SubscriptionController {
         subscriptionService.addPaymentMethodToWebShop(paymentMethodId, subscriptionId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-/*
+
     @PostMapping("/removeMethod/{subscriptionId}/{paymentMethodId}")
     public ResponseEntity<?> removeMethodFromWebShop(@PathVariable Long subscriptionId, @PathVariable Long paymentMethodId){
         subscriptionService.removePaymentMethodFromWebShop(paymentMethodId, subscriptionId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-*/
+
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllSubscriptions(){

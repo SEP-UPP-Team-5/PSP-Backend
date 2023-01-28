@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,8 +23,9 @@ public class PaymentMethod {
     private String methodName;
     private String merchant;
     @JsonIgnore
-    @ManyToOne
     @JoinColumn(name = "subscription_id")
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Subscription subscription;
 
 }

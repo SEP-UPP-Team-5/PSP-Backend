@@ -5,14 +5,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateTransactionDTO {
 
-    private String creatingOrderTime;
     private Double amount;
     private String webShopOrderId;
+    private LocalDateTime webShopTimestamp;
     private String apiKey;
 }

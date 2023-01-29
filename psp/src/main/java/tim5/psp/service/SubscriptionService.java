@@ -25,10 +25,8 @@ public class SubscriptionService {
     @Autowired
     private TokenUtils token;
     public Subscription subscribeWebShop(SubscriptionDTO dto){
-
-        Subscription subscription = new Subscription();
-        subscription.setWebShopURI(dto.getWebShopURI());
-        subscription.setApiKey(BCrypt.hashpw(token.generateToken(dto.getWebShopURI()), BCrypt.gensalt()));
+        Subscription subscription = new Subscription(null, dto.getWebShopURI(),
+                BCrypt.hashpw(token.generateToken(dto.getWebShopURI()), BCrypt.gensalt()), dto.getSuccessUrl(), dto.getFailedUrl(), dto.getErrorUrl(), new HashSet<>());
 
         return subscriptionRepository.save(subscription);
     }

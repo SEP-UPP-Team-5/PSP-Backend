@@ -13,6 +13,8 @@ import java.util.List;
 @Setter
 public class PaymentMethodDTO {
     private String methodName;
-    private String merchant;
+    private String methodServiceName;
+    private String merchant_id;
+    private String merchant_password;
 
 }

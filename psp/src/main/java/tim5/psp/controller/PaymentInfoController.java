@@ -107,7 +107,7 @@ public class PaymentInfoController {
                 if(method.getMethodName().equals("Credit Card") || method.getMethodName().equals("QR Code"))
                     return registeredApplication.getInstances().get(0).getIPAddr() + ":" + registeredApplication.getInstances().get(0).getPort() + "/payment/" + getBankPathParam(method.getMethodName());
                 else
-                    return registeredApplication.getInstances().get(0).getIPAddr() + ":" + registeredApplication.getInstances().get(0).getPort() + "/orders/create";
+                    return "http://" + registeredApplication.getInstances().get(0).getIPAddr() + ":" + registeredApplication.getInstances().get(0).getPort() + "/orders/create";
             }
         }
 

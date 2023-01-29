@@ -13,6 +13,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import tim5.psp.dto.CreateTransactionDTO;
+import tim5.psp.dto.CreateTransactionResponseDTO;
 import tim5.psp.dto.PaymentConfirmationDTO;
 import tim5.psp.model.PaymentInfo;
 import tim5.psp.model.PaymentMethod;
@@ -40,9 +41,12 @@ public class PaymentInfoController {
 
     @PostMapping(path = "/create")
     public ResponseEntity<?> createTransaction(@RequestBody CreateTransactionDTO createTransactionDTO){
-        paymentInfoService.createTransactionFromOrderDetails(createTransactionDTO);
+        PaymentInfo paymentInfo = paymentInfoService.createTransactionFromOrderDetails(createTransactionDTO);
+        CreateTransactionResponseDTO dto = new CreateTransactionResponseDTO();
+        dto.setTransactionId(paymentInfo.getId());
+        dto.setUrl("http://localhost:55131/methods/");
         System.out.println("psp");
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(dto,HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/paymentMethods/{transactionId}")

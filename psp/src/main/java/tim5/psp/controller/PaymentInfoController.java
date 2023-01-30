@@ -105,7 +105,7 @@ public class PaymentInfoController {
             if(registeredApplication.getName().equals(method.getMethodServiceName())){
                 System.out.println("Send info to this eureka client: " + registeredApplication.getName());
                 if(method.getMethodName().equals("Credit Card") || method.getMethodName().equals("QR Code"))
-                    return registeredApplication.getInstances().get(0).getIPAddr() + ":" + registeredApplication.getInstances().get(0).getPort() + "/payment/" + getBankPathParam(method.getMethodName());
+                    return "http://" + registeredApplication.getInstances().get(0).getIPAddr() + ":" + registeredApplication.getInstances().get(0).getPort() + "/payment/" + getBankPathParam(method.getMethodName());
                 else
                     return "http://" + registeredApplication.getInstances().get(0).getIPAddr() + ":" + registeredApplication.getInstances().get(0).getPort() + "/orders/create";
             }

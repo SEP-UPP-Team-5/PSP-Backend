@@ -18,8 +18,9 @@ public class PaymentMethodService {
     public PaymentMethod createNewPaymentMethod(PaymentMethodDTO dto){
         PaymentMethod newMethod =  new PaymentMethod();
         newMethod.setMethodName(dto.getMethodName());
-        newMethod.setMerchant(dto.getMerchant());  //for PayPal some of existing ids from developer account
-
+        newMethod.setMethodServiceName(dto.getMethodServiceName());
+        newMethod.setMerchant_id(dto.getMerchant_id());  //for PayPal some of existing ids from developer account
+        newMethod.setMerchant_password(dto.getMerchant_password());
         return paymentMethodRepository.save(newMethod);
     }
 

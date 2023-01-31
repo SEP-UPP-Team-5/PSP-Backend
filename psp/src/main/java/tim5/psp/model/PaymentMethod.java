@@ -21,7 +21,9 @@ public class PaymentMethod {
     @Column(name = "id", nullable = false, unique = true)
     private Long id;
     private String methodName;
-    private String merchant;
+    private String methodServiceName;
+    private String merchant_id;
+    private String merchant_password;
     @JsonIgnore
     @JoinColumn(name = "subscription_id")
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})

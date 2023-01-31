@@ -28,10 +28,10 @@ public class PaymentInfoService {
         Subscription subscription = subscriptionRepository.findByApiKey(createTransactionDTO.getApiKey());
         PaymentInfo paymentInfo = new PaymentInfo();
         paymentInfo.setAmount(createTransactionDTO.getAmount());
-        paymentInfo.setDate(createTransactionDTO.getCreatingOrderTime());
         paymentInfo.setWebShopOrderId(createTransactionDTO.getWebShopOrderId());
-        paymentInfo.setSubscription(subscription);
+        paymentInfo.setWebShopTimestamp(createTransactionDTO.getWebShopTimestamp());
         paymentInfo.setIsPaid(false);
+        paymentInfo.setSubscription(subscription);
 
         return paymentInfoRepository.save(paymentInfo);
     }
@@ -40,7 +40,7 @@ public class PaymentInfoService {
         PaymentInfo transaction = paymentInfoRepository.findById(transactionId).get();
         PaymentMethod method = paymentMethodRepository.findById(methodId).get();
         transaction.setPaymentMethod(method.getMethodName());
-        transaction.setMerchantId(method.getMerchant());
+        transaction.setMerchantId(method.getMerchant_id());
         return paymentInfoRepository.save(transaction);
     }
 
@@ -56,6 +56,13 @@ public class PaymentInfoService {
         paymentInfoRepository.save(transaction);
 
         return null;
+    }
+
+    public PaymentInfo markAsPaid(String webShopOrderId) {
+        PaymentInfo transaction = paymentInfoRepository.findByWebShopOrderId(webShopOrderId);
+        transaction.setIsPaid(true);
+        paymentInfoRepository.save(transaction);
+        return transaction;
     }
 
     public void save(PaymentInfo paymentInfo){

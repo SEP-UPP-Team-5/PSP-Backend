@@ -17,5 +17,8 @@ import java.util.Set;
 public class SubscriptionDTO {
 
     private String webShopURI;
+    private String successUrl;
+    private String failedUrl;
+    private String errorUrl;
     private Set<PaymentMethod> methods;
 }

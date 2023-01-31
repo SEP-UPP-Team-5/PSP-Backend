@@ -23,6 +23,9 @@ public class Subscription {
 
     private String webShopURI;
     private String apiKey;
+    private String successUrl;
+    private String failedUrl;
+    private String errorUrl;
 
 
     @OneToMany(mappedBy = "subscription", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)

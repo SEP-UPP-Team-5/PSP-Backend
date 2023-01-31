@@ -58,6 +58,13 @@ public class PaymentInfoService {
         return null;
     }
 
+    public PaymentInfo markAsPaid(String webShopOrderId) {
+        PaymentInfo transaction = paymentInfoRepository.findByWebShopOrderId(webShopOrderId);
+        transaction.setIsPaid(true);
+        paymentInfoRepository.save(transaction);
+        return transaction;
+    }
+
     public void save(PaymentInfo paymentInfo){
         paymentInfoRepository.save(paymentInfo);
     }

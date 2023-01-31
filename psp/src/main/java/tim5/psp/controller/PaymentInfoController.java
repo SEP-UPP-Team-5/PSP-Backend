@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import tim5.psp.dto.CreateTransactionDTO;
 import tim5.psp.dto.CreateTransactionResponseDTO;
+import tim5.psp.dto.PaymentConfirmationBankDTO;
 import tim5.psp.dto.PaymentConfirmationDTO;
 import tim5.psp.model.PaymentInfo;
 import tim5.psp.model.PaymentMethod;
@@ -141,6 +142,28 @@ public class PaymentInfoController {
         System.out.println("captureOrderResponse");
         System.out.println(captureOrderResponse);
 
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/confirmBank")
+    public ResponseEntity<?> confirmPaymentBank(@RequestBody PaymentConfirmationBankDTO dto){
+        if(dto.getStatus().equals("SUCCESS")){
+            PaymentInfo paymentInfo = paymentInfoService.markAsPaid(dto.getMerchantOrderId());
+            String pspUrl = paymentInfo.getSubscription().getWebShopURI() + "/purchase/confirm/" + dto.getMerchantOrderId();
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("webShopOrderId", dto.getMerchantOrderId());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            HttpEntity<String> request = new HttpEntity<>(obj.toString(), headers);
+            String captureOrderResponse = restTemplate.postForObject(pspUrl, request, String.class);
+            System.out.println("captureOrderResponse");
+            System.out.println(captureOrderResponse);
+        }
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

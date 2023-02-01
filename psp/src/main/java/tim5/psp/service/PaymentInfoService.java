@@ -1,10 +1,9 @@
 package tim5.psp.service;
-import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tim5.psp.dto.CreateTransactionDTO;
-import tim5.psp.dto.PaymentConfirmationDTO;
-import tim5.psp.dto.PaymentMethodDTO;
+import tim5.psp.dto.PaymentConfirmationBitcoinDTO;
+import tim5.psp.dto.PaymentConfirmationPayPalDTO;
 import tim5.psp.model.PaymentInfo;
 import tim5.psp.model.PaymentMethod;
 import tim5.psp.model.Subscription;
@@ -48,21 +47,24 @@ public class PaymentInfoService {
         return paymentInfoRepository.findById(id).get();
     }
 
-    public Boolean markAsPayed(PaymentConfirmationDTO dto) {
+    public PaymentInfo markAsPaidPayPalTransaction(PaymentConfirmationPayPalDTO dto) {
         PaymentInfo transaction = paymentInfoRepository.findByWebShopOrderId(dto.getWebShopOrderId());
-        transaction.setIsPaid(true);
         transaction.setPayerId(dto.getPayerId());
-        transaction.setMerchantId(dto.getBitcoinWalletAddress());
-        paymentInfoRepository.save(transaction);
+        transaction.setIsPaid(true);
+        return paymentInfoRepository.save(transaction);
+    }
 
-        return null;
+    public PaymentInfo markAsPaidBitcoinTransaction(PaymentConfirmationBitcoinDTO dto) {
+        PaymentInfo transaction = paymentInfoRepository.findByWebShopOrderId(dto.getWebShopOrderId());
+        transaction.setPayerId(dto.getBitcoinWalletAddress());
+        transaction.setIsPaid(true);
+        return paymentInfoRepository.save(transaction);
     }
 
     public PaymentInfo markAsPaid(String webShopOrderId) {
         PaymentInfo transaction = paymentInfoRepository.findByWebShopOrderId(webShopOrderId);
         transaction.setIsPaid(true);
-        paymentInfoRepository.save(transaction);
-        return transaction;
+        return paymentInfoRepository.save(transaction);
     }
 
     public void save(PaymentInfo paymentInfo){

@@ -6,20 +6,20 @@ import com.netflix.eureka.registry.PeerAwareInstanceRegistry;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import tim5.psp.dto.CreateTransactionDTO;
-import tim5.psp.dto.CreateTransactionResponseDTO;
-import tim5.psp.dto.PaymentConfirmationBankDTO;
-import tim5.psp.dto.PaymentConfirmationDTO;
+import tim5.psp.dto.*;
 import tim5.psp.model.PaymentInfo;
 import tim5.psp.model.PaymentMethod;
 import tim5.psp.service.PaymentInfoService;
 import tim5.psp.service.PaymentMethodService;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Set;
 
 @RestController
@@ -33,6 +33,9 @@ public class PaymentInfoController {
     @Autowired
     private PaymentMethodService paymentMethodService;
 
+    @Autowired
+    private Environment env;
+
     @LoadBalanced
     @Bean
     public RestTemplate restTemplate() {
@@ -41,11 +44,13 @@ public class PaymentInfoController {
 
 
     @PostMapping(path = "/create")
-    public ResponseEntity<?> createTransaction(@RequestBody CreateTransactionDTO createTransactionDTO){
+    public ResponseEntity<?> createTransaction(@RequestBody CreateTransactionDTO createTransactionDTO) throws URISyntaxException {
         PaymentInfo paymentInfo = paymentInfoService.createTransactionFromOrderDetails(createTransactionDTO);
+        URI pspFrontendUrl = new URI(env.getProperty("psp.frontend.host"));
+
         CreateTransactionResponseDTO dto = new CreateTransactionResponseDTO();
         dto.setTransactionId(paymentInfo.getId());
-        dto.setUrl("http://localhost:55131/methods/");
+        dto.setUrl(pspFrontendUrl.toString());
         System.out.println("psp");
         return new ResponseEntity<>(dto,HttpStatus.CREATED);
     }
@@ -65,13 +70,8 @@ public class PaymentInfoController {
         PaymentMethod method = paymentMethodService.findOne(methodId);
 
         String url = getUrlFromPaymentMethod(method);
-
-        //String payPalUrl = "http://localhost:8082/orders/create";
-        //String bitcoinUrl = "http://localhost:8085/orders/create";
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        //TODO: headers.setBearerAuth(token);
         JSONObject obj = new JSONObject();
         try {
             obj.put("totalAmount", transaction.getAmount());
@@ -88,12 +88,11 @@ public class PaymentInfoController {
         }
 
         HttpEntity<String> request = new HttpEntity<>(obj.toString(), headers);
-
         RestTemplate restTemplate = new RestTemplate();
-        String approvalUrl = restTemplate.postForObject(url, request, String.class);
-        System.out.println("poslato sa psp na servis za placanje");
-        System.out.println(approvalUrl);
-        return new ResponseEntity<>(approvalUrl, HttpStatus.CREATED);
+        String paymentServiceResponse = restTemplate.postForObject(url, request, String.class);
+        System.out.println("Sent from PSP to:"  + method.getMethodServiceName());
+        System.out.println(paymentServiceResponse);
+        return new ResponseEntity<>(paymentServiceResponse, HttpStatus.CREATED);
 
     }
 
@@ -120,12 +119,11 @@ public class PaymentInfoController {
     }
 
 
-    @PostMapping(path = "/confirm")
-    public ResponseEntity<?> confirmPayment(@RequestBody PaymentConfirmationDTO dto){
-        paymentInfoService.markAsPayed(dto);
+    @PostMapping(path = "/confirmPayPal")
+    public ResponseEntity<?> confirmPayPalPayment(@RequestBody PaymentConfirmationPayPalDTO dto){
 
-        String pspUrl = "http://localhost:8081/purchase/confirm/" + dto.getWebShopOrderId();
-
+        PaymentInfo paymentInfo = paymentInfoService.markAsPaidPayPalTransaction(dto);
+        String pspUrl = paymentInfo.getSubscription().getWebShopURI() + "/purchase/confirm/" + dto.getWebShopOrderId();
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -145,8 +143,34 @@ public class PaymentInfoController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
+
+    @PostMapping(path = "/confirmBitcoin")
+    public ResponseEntity<?> confirmBitcoinPayment(@RequestBody PaymentConfirmationBitcoinDTO dto){
+
+        PaymentInfo paymentInfo = paymentInfoService.markAsPaidBitcoinTransaction(dto);
+        String pspUrl = paymentInfo.getSubscription().getWebShopURI() + "/purchase/confirm/" + dto.getWebShopOrderId();
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("webShopOrderId", dto.getWebShopOrderId());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HttpEntity<String> request = new HttpEntity<>(obj.toString(), headers);
+        String captureOrderResponse = restTemplate.postForObject(pspUrl, request, String.class);
+        System.out.println("captureOrderResponse");
+        System.out.println(captureOrderResponse);
+
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+
     @PostMapping(path = "/confirmBank")
-    public ResponseEntity<?> confirmPaymentBank(@RequestBody PaymentConfirmationBankDTO dto){
+    public ResponseEntity<?> confirmBankPayment(@RequestBody PaymentConfirmationBankDTO dto){
         if(dto.getStatus().equals("SUCCESS")){
             PaymentInfo paymentInfo = paymentInfoService.markAsPaid(dto.getMerchantOrderId());
             String pspUrl = paymentInfo.getSubscription().getWebShopURI() + "/purchase/confirm/" + dto.getMerchantOrderId();

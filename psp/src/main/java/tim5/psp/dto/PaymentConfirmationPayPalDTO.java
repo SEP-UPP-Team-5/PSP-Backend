@@ -10,9 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class PaymentConfirmationDTO {
+public class PaymentConfirmationPayPalDTO {
 
     private String webShopOrderId;
     private String payerId;
-    private String bitcoinWalletAddress;
 }

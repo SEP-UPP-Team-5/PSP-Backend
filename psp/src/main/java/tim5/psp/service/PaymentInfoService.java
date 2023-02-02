@@ -21,10 +21,10 @@ public class PaymentInfoService {
     private PaymentMethodRepository paymentMethodRepository;
 
     @Autowired
-    private SubscriptionRepository subscriptionRepository;
+    private SubscriptionService subscriptionService;
 
     public PaymentInfo createTransactionFromOrderDetails(CreateTransactionDTO createTransactionDTO){
-        Subscription subscription = subscriptionRepository.findByApiKey(createTransactionDTO.getApiKey());
+        Subscription subscription = subscriptionService.getByApiKey(createTransactionDTO.getApiKey());
         PaymentInfo paymentInfo = new PaymentInfo();
         paymentInfo.setAmount(createTransactionDTO.getAmount());
         paymentInfo.setWebShopOrderId(createTransactionDTO.getWebShopOrderId());

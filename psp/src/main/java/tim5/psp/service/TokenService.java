@@ -6,8 +6,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tim5.psp.model.PaymentMethod;
+import tim5.psp.model.Subscription;
+import tim5.psp.model.TokenUtils;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
@@ -18,28 +22,33 @@ import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 public class TokenService {
     @Value("secret")
     public String SECRET;
+    @Autowired
+    private TokenUtils tokenUtils;
 
-    public Boolean validateToken(String token, String permission){
+    public String generateTokenPayment(Subscription subscription){
+        return tokenUtils.generateToken(subscription.getWebShopURI(), getPermissions(subscription));
+    }
 
-       /* JwtUser jwtUser = null;
-
-        try {
-            Claims body = Jwts.parser()
-                    .setSigningKey(SECRET)
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            jwtUser = new JwtUser();
-
-            jwtUser.setUserName(body.getSubject());
-            jwtUser.setId(Long.parseLong((String) body.get("userId")));
-            jwtUser.setRole((String) body.get("role"));
+    private String getPermissions(Subscription subscription){
+        String permission = "";
+        for (PaymentMethod m : subscription.getMethods()) {
+            permission += m.getMethodName() + ",";
         }
-        catch (Exception e) {
-            System.out.println(e);
-        }
-        return null;*/
-        return null;
+        permission += "transaction_permission";
+        return permission;
+    }
+
+    public Boolean validateToken(String token, String permission) throws JSONException {
+        //  TODO: time validation
+        String permissions = decodeJWTToken(token);
+        String[] permissionArray = permissions.split(",");
+        System.out.println(permissions);
+        System.out.println(permission);
+        for(String permissionFromArray:permissionArray)
+            if(permissionFromArray.equals(permission))
+                return true;
+
+        return false;
     }
     private static String decode(String encodedString) {
         return new String(Base64.getUrlDecoder().decode(encodedString));

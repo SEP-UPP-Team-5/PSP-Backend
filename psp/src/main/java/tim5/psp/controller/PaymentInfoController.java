@@ -17,6 +17,7 @@ import tim5.psp.model.PaymentInfo;
 import tim5.psp.model.PaymentMethod;
 import tim5.psp.service.PaymentInfoService;
 import tim5.psp.service.PaymentMethodService;
+import tim5.psp.service.SubscriptionService;
 import tim5.psp.service.TokenService;
 
 import java.net.URI;
@@ -37,6 +38,9 @@ public class PaymentInfoController {
     private PaymentMethodService paymentMethodService;
 
     @Autowired
+    private SubscriptionService subscriptionService;
+
+    @Autowired
     private Environment env;
 
     @Autowired
@@ -51,12 +55,16 @@ public class PaymentInfoController {
 
     @PostMapping(path = "/create")
     public ResponseEntity<?> createTransaction(@RequestBody CreateTransactionDTO createTransactionDTO) throws URISyntaxException {
+        if(subscriptionService.getByApiKey(createTransactionDTO.getApiKey())==null)
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
         PaymentInfo paymentInfo = paymentInfoService.createTransactionFromOrderDetails(createTransactionDTO);
         URI pspFrontendUrl = new URI(env.getProperty("psp.frontend.host"));
 
         CreateTransactionResponseDTO dto = new CreateTransactionResponseDTO();
         dto.setTransactionId(paymentInfo.getId());
         dto.setUrl(pspFrontendUrl.toString());
+        dto.setToken(tokenService.generateTokenPayment(paymentInfo.getSubscription()));
         System.out.println("psp");
         return new ResponseEntity<>(dto,HttpStatus.CREATED);
     }
@@ -70,10 +78,15 @@ public class PaymentInfoController {
 
 
     @PostMapping(path = "/send/{transactionId}/{methodId}")
-    public ResponseEntity<?> sendTransactionInfo(@PathVariable Long transactionId, @PathVariable Long methodId){
+    public ResponseEntity<?> sendTransactionInfo(@RequestHeader("Authorization") String token, @PathVariable Long transactionId, @PathVariable Long methodId) throws JSONException {
+        if(!tokenService.validateToken(token, "transaction_permission"))
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
         PaymentInfo transaction = paymentInfoService.sendTransactionInfo(transactionId, methodId);
         PaymentMethod method = paymentMethodService.findOne(methodId);
+
+        if(!tokenService.validateToken(token, method.getMethodName()))
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         String url = getUrlFromPaymentMethod(method);
         HttpHeaders headers = new HttpHeaders();

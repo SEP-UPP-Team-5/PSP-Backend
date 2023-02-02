@@ -3,6 +3,7 @@ package tim5.psp.service;
 import com.netflix.appinfo.ApplicationInfoManager;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.hibernate.collection.internal.StandardBagSemantics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,13 +35,13 @@ public class SubscriptionService {
 
     @Autowired
     private TokenUtils token;
-    public Subscription subscribeWebShop(SubscriptionDTO dto){
-        Subscription subscription = new Subscription(null, dto.getWebShopURI(), token.generateToken(dto.getWebShopURI(), "transaction_permission"), dto.getSuccessUrl(), dto.getFailedUrl(), dto.getErrorUrl(), new HashSet<>());
 
+    public Subscription subscribeWebShop(SubscriptionDTO dto) {
+        Subscription subscription = new Subscription(null, dto.getWebShopURI(), token.generateToken(dto.getWebShopURI(), "transaction_permission"), dto.getSuccessUrl(), dto.getFailedUrl(), dto.getErrorUrl(), new HashSet<>());
         return subscriptionRepository.save(subscription);
     }
 
-    public PaymentMethod addPaymentMethodToWebShop(Long paymentMethodId, Long subscriptionId){
+    public PaymentMethod addPaymentMethodToWebShop(Long paymentMethodId, Long subscriptionId) {
         Subscription subscription = subscriptionRepository.findById(subscriptionId).get();
         PaymentMethod method = paymentMethodRepository.findById(paymentMethodId).get();
         method.setSubscription(subscription);
@@ -49,7 +50,7 @@ public class SubscriptionService {
         methods.add(method);
         subscription.setMethods(methods);
         String permission = "";
-        for(PaymentMethod m: methods){
+        for (PaymentMethod m : methods) {
             permission += m.getMethodName() + ",";
         }
         permission += "transaction_permission";
@@ -62,7 +63,7 @@ public class SubscriptionService {
         return paymentMethodRepository.save(method);
     }
 
-    private void sendApiKeyToWebShop(Subscription subscription){
+    private void sendApiKeyToWebShop(Subscription subscription) {
         String hostName = infoManager.getInfo().getHostName();
         Integer port = infoManager.getInfo().getPort();
 
@@ -82,14 +83,14 @@ public class SubscriptionService {
 
     }
 
-    public PaymentMethod removePaymentMethodFromWebShop(Long paymentMethodId, Long subscriptionId){
+    public PaymentMethod removePaymentMethodFromWebShop(Long paymentMethodId, Long subscriptionId) {
         Subscription subscription = subscriptionRepository.findById(subscriptionId).get();
         PaymentMethod method = paymentMethodRepository.findById(paymentMethodId).get();
         method.getSubscription().getMethods().remove(method); //odavde uklonio
 
         Set<PaymentMethod> methods = subscription.getMethods();
-        for (Iterator<PaymentMethod> iterator = methods.iterator(); iterator.hasNext();) {
-            PaymentMethod m =  iterator.next();
+        for (Iterator<PaymentMethod> iterator = methods.iterator(); iterator.hasNext(); ) {
+            PaymentMethod m = iterator.next();
             if (m.getId().equals(method.getId())) {
                 iterator.remove();
                 subscription.getMethods().remove(method);
@@ -99,23 +100,32 @@ public class SubscriptionService {
         return paymentMethodRepository.save(method);
     }
 
-    public Set<PaymentMethod> getSubscribedPaymentMethodsForWebShop(String apiKey){
+    public Set<PaymentMethod> getSubscribedPaymentMethodsForWebShop(String apiKey) {
 
         Subscription subscription = subscriptionRepository.findByApiKey(apiKey);
         Set<PaymentMethod> enabledMethods = new HashSet<>();
 
-        for(PaymentMethod method : paymentMethodRepository.findAll()){
-            if(method.getSubscription().getId().equals(subscription.getId()))
+        for (PaymentMethod method : paymentMethodRepository.findAll()) {
+            if (method.getSubscription().getId().equals(subscription.getId()))
                 enabledMethods.add(method);
         }
 
         return enabledMethods;
     }
 
-    public Subscription save(Subscription subscription){
+    public Subscription save(Subscription subscription) {
         return subscriptionRepository.save(subscription);
     }
 
-    public List<Subscription> findAll(){return subscriptionRepository.findAll();}
+    public List<Subscription> findAll() {
+        return subscriptionRepository.findAll();
+    }
+
+    public Subscription getByApiKey(String apiKey){
+        for(Subscription subscription:findAll())
+            if(subscription.getApiKey().equals(apiKey))
+                return subscription;
+        return null;
+    }
 }
 

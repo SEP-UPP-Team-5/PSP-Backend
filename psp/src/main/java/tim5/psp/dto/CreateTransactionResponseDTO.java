@@ -7,4 +7,6 @@ public class CreateTransactionResponseDTO {
 
     private String url;
     private Long transactionId;
+
+    private String token;
 }

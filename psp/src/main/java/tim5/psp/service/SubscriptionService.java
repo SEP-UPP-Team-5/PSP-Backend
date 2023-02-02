@@ -1,8 +1,15 @@
 package tim5.psp.service;
 
+import com.netflix.appinfo.ApplicationInfoManager;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import tim5.psp.dto.PaymentMethodDTO;
 import tim5.psp.dto.SubscriptionDTO;
 import tim5.psp.model.PaymentMethod;
@@ -23,10 +30,12 @@ public class SubscriptionService {
     private PaymentMethodRepository paymentMethodRepository;
 
     @Autowired
+    private ApplicationInfoManager infoManager;
+
+    @Autowired
     private TokenUtils token;
     public Subscription subscribeWebShop(SubscriptionDTO dto){
-        Subscription subscription = new Subscription(null, dto.getWebShopURI(),
-                BCrypt.hashpw(token.generateToken(dto.getWebShopURI()), BCrypt.gensalt()), dto.getSuccessUrl(), dto.getFailedUrl(), dto.getErrorUrl(), new HashSet<>());
+        Subscription subscription = new Subscription(null, dto.getWebShopURI(), token.generateToken(dto.getWebShopURI(), "transaction_permission"), dto.getSuccessUrl(), dto.getFailedUrl(), dto.getErrorUrl(), new HashSet<>());
 
         return subscriptionRepository.save(subscription);
     }
@@ -39,9 +48,38 @@ public class SubscriptionService {
         Set<PaymentMethod> methods = subscription.getMethods();
         methods.add(method);
         subscription.setMethods(methods);
+        String permission = "";
+        for(PaymentMethod m: methods){
+            permission += m.getMethodName() + ",";
+        }
+        permission += "transaction_permission";
+        subscription.setApiKey(token.generateToken(subscription.getWebShopURI(), permission));
         subscriptionRepository.save(subscription);
 
+
+        sendApiKeyToWebShop(subscription);
+
         return paymentMethodRepository.save(method);
+    }
+
+    private void sendApiKeyToWebShop(Subscription subscription){
+        String hostName = infoManager.getInfo().getHostName();
+        Integer port = infoManager.getInfo().getPort();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("apiKey", subscription.getApiKey());
+            obj.put("url", "http://" + hostName + ":" + port);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HttpEntity<String> request = new HttpEntity<>(obj.toString(), headers);
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.postForObject(subscription.getWebShopURI() + "/purchase/createSubscription", request, String.class);
+
     }
 
     public PaymentMethod removePaymentMethodFromWebShop(Long paymentMethodId, Long subscriptionId){

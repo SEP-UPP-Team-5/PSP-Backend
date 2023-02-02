@@ -29,14 +29,14 @@ public class TokenUtils {
 
     private SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
 
-    public String generateToken(String webShopURI) {
+    public String generateToken(String webShopURI, String permission) {
         return Jwts.builder()
                 .setIssuer(APP_NAME)
                 .setSubject(webShopURI)
                 .setAudience(generateAudience())
                 .setIssuedAt(new Date())
                 .setExpiration(generateExpirationDate())
-                //.claim("roles", role)
+                .claim("permissions", permission)
                 .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
     }
 

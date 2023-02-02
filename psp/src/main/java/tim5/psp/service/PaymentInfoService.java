@@ -67,7 +67,4 @@ public class PaymentInfoService {
         return paymentInfoRepository.save(transaction);
     }
 
-    public void save(PaymentInfo paymentInfo){
-        paymentInfoRepository.save(paymentInfo);
-    }
 }

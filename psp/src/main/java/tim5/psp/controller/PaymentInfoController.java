@@ -17,9 +17,12 @@ import tim5.psp.model.PaymentInfo;
 import tim5.psp.model.PaymentMethod;
 import tim5.psp.service.PaymentInfoService;
 import tim5.psp.service.PaymentMethodService;
+import tim5.psp.service.TokenService;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -35,6 +38,9 @@ public class PaymentInfoController {
 
     @Autowired
     private Environment env;
+
+    @Autowired
+    private TokenService tokenService;
 
     @LoadBalanced
     @Bean
@@ -63,7 +69,7 @@ public class PaymentInfoController {
     }
 
 
-    @PostMapping(path = "/send/{transactionId}/{methodId}") // oov se poziva kad se klikne na izabrani nacin placanja
+    @PostMapping(path = "/send/{transactionId}/{methodId}")
     public ResponseEntity<?> sendTransactionInfo(@PathVariable Long transactionId, @PathVariable Long methodId){
 
         PaymentInfo transaction = paymentInfoService.sendTransactionInfo(transactionId, methodId);
@@ -90,10 +96,10 @@ public class PaymentInfoController {
         HttpEntity<String> request = new HttpEntity<>(obj.toString(), headers);
         RestTemplate restTemplate = new RestTemplate();
         String paymentServiceResponse = restTemplate.postForObject(url, request, String.class);
-        System.out.println("Sent from PSP to:"  + method.getMethodServiceName());
+        System.out.println("Sent info from PSP to: "  + method.getMethodServiceName());
         System.out.println(paymentServiceResponse);
-        return new ResponseEntity<>(paymentServiceResponse, HttpStatus.CREATED);
 
+        return new ResponseEntity<>(paymentServiceResponse, HttpStatus.CREATED);
     }
 
     private String getUrlFromPaymentMethod(PaymentMethod method) {
@@ -205,6 +211,25 @@ public class PaymentInfoController {
         }
 
         return "";
+    }
+
+    @GetMapping(path = "/getAllEurekaClients")
+    public List<String> findEurekaClients(@RequestHeader("Authorization") String token){
+        System.out.println(token);
+        PeerAwareInstanceRegistry registry = EurekaServerContextHolder.getInstance().getServerContext().getRegistry();
+        Applications applications = registry.getApplications();
+        List<String> serviceNames = new ArrayList<>();
+
+        for(Application registeredApplication : applications.getRegisteredApplications()){
+            System.out.println("Eureka client app name: "  + registeredApplication.getName() + ", instance name: " +  registeredApplication.getInstances().get(0).getAppName() +  ", IP address: " + registeredApplication.getInstances().get(0).getIPAddr() + ", port: " + registeredApplication.getInstances().get(0).getPort());
+            serviceNames.add(registeredApplication.getName());
+        }
+        return serviceNames;
+    }
+
+    @PostMapping(path = "/decode/{token}")
+    public ResponseEntity<?> decodeToken(@PathVariable String token) throws JSONException {
+        return new ResponseEntity<>(tokenService.decodeJWTToken(token), HttpStatus.OK);
     }
 
 

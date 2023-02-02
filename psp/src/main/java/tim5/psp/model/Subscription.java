@@ -22,6 +22,8 @@ public class Subscription {
     private Long id;
 
     private String webShopURI;
+    @Lob
+    @Column(length=512)
     private String apiKey;
     private String successUrl;
     private String failedUrl;
